@@ -1,0 +1,33 @@
+{
+  "name": "emplify-server",
+  "version": "1.0.0",
+  "description": "Server",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zhzhang-4390/emplify-server.git"
+  },
+  "author": "zhzhang-4390",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/zhzhang-4390/emplify-server/issues"
+  },
+  "dependencies": {
+    "@google-cloud/storage": "^4.6.0",
+    "bcrypt": "^4.0.1",
+    "connect-mongo": "^3.2.0",
+    "cors": "^2.8.5",
+    "express": "^4.17.1",
+    "express-session": "^1.17.0",
+    "formidable": "^1.2.2",
+    "lodash": "^4.17.15",
+    "mongoose": "^5.9.5"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.2",
+    "dotenv": "^8.2.0"
+  }
+}
