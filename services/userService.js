@@ -7,7 +7,11 @@ const User = require("../models/user");
 
 const router = express.Router();
 
-router.get("/getAllUsers", (req, res) => {
+router.get("/getAllUsers", authorization, (req, res) => {
+  if (req.session.user.role !== "admin") {
+    return res.sendStatus(403);
+  }
+
   User.find({}, "email role createdAt updatedAt").exec((err, users) => {
     res.send(users);
   });
@@ -34,7 +38,7 @@ router.post("/signIn", async (req, res, next) => {
   }
 });
 
-router.post("/signOut", (req, res, next) => {
+router.post("/signOut", authorization, (req, res, next) => {
   req.session.destroy(err => {
     if (err) {
       return res.sendStatus(500);
