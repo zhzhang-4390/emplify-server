@@ -16,9 +16,6 @@ app.use(
   session({
     store: new MongoStore({ mongooseConnection: mongoose.connection }),
     name: process.env.SESSION_NAME,
-    cookie: {
-      sameSite: true
-    },
     resave: false,
     saveUninitialized: false,
     secret: process.env.SESSION_SECRET
