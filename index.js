@@ -16,9 +16,12 @@ app.use(
   session({
     store: new MongoStore({ mongooseConnection: mongoose.connection }),
     name: process.env.SESSION_NAME,
+    secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
-    secret: process.env.SESSION_SECRET
+    cookie: {
+      maxAge: 86400000
+    }
   })
 );
 app.use("/userService", require("./services/userService"));
