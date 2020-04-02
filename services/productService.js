@@ -2,18 +2,19 @@ const express = require("express");
 const _ = require("lodash");
 const formidable = require("formidable");
 const fs = require("fs");
-const path = require("path");
-const { Storage } = require("@google-cloud/storage");
+const aws = require("aws-sdk");
 
 const authorization = require("../middlewares/authorization");
 const Product = require("../models/product");
 
-const router = express.Router();
-const storage = new Storage({
-  keyFilename: `${path.resolve(__dirname)}/../Emplify-befcf9647dd2.json`,
-  projectId: "emplify"
+aws.config.update({ region: "ap-southeast-1" });
+const s3 = new aws.S3({
+  accessKeyId: "AKIA4NXVRQAIWA5K426J",
+  secretAccessKey: "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"
 });
-const storageURL = "https://storage.cloud.google.com/emplify/";
+const CLOUD_URL = "https://emplify.s3-ap-southeast-1.amazonaws.com/";
+
+const router = express.Router();
 
 router.get("/getAllProductsForShelf", (req, res, next) => {
   Product.find({}, "name category description price frontImage").exec(
@@ -101,28 +102,28 @@ router.post("/addOrUpdateProduct", authorization, async (req, res, next) => {
       );
     }
 
-    const promisesOfUploadToGCS = [];
+    const promisesOfUploadToCloud = [];
     if (files.frontImage) {
-      const frontImageGCSPath = `products/${product.name}/${files.frontImage.name}`;
-      product.frontImage = storageURL + frontImageGCSPath;
-      promisesOfUploadToGCS.push(
-        uploadToGCS(files.frontImage.path, frontImageGCSPath)
+      const frontImageCloudPath = `products/${product.name}/${files.frontImage.name}`;
+      product.frontImage = CLOUD_URL + frontImageCloudPath;
+      promisesOfUploadToCloud.push(
+        uploadToCloud(files.frontImage.path, frontImageCloudPath)
       );
     }
     if (files.images) {
       files.images = [].concat(files.images);
-      const imageGCSPaths = files.images.map(
+      const imageCloudPaths = files.images.map(
         image => `products/${product.name}/images/${image.name}`
       );
-      const imageGCSURLs = imageGCSPaths.map(
-        imageStoragePath => storageURL + imageStoragePath
+      const imageCloudURLs = imageCloudPaths.map(
+        imageCloudPath => CLOUD_URL + imageCloudPath
       );
 
-      product.images = product.images.concat(imageGCSURLs);
+      product.images = product.images.concat(imageCloudURLs);
 
-      promisesOfUploadToGCS.concat(
+      promisesOfUploadToCloud.concat(
         files.images.map((image, index) =>
-          uploadToGCS(image.path, imageGCSPaths[index])
+          uploadToCloud(image.path, imageCloudPaths[index])
         )
       );
     }
@@ -130,7 +131,7 @@ router.post("/addOrUpdateProduct", authorization, async (req, res, next) => {
     product
       .save()
       .then(() => {
-        Promise.all(promisesOfUploadToGCS)
+        Promise.all(promisesOfUploadToCloud)
           .then(() => res.sendStatus(201))
           .catch(next);
       })
@@ -138,18 +139,23 @@ router.post("/addOrUpdateProduct", authorization, async (req, res, next) => {
   });
 });
 
-function uploadToGCS(inputPath, outputPath) {
+function uploadToCloud(inputPath, outputPath) {
   return new Promise((resolve, reject) => {
-    const GCSFile = storage.bucket("emplify").file(outputPath);
-    fs.createReadStream(inputPath)
-      .pipe(
-        GCSFile.createWriteStream({
-          resumable: false,
-          gzip: true
-        })
-      )
-      .on("finish", () => resolve())
-      .on("error", err => reject(err));
+    s3.upload(
+      {
+        Bucket: "emplify",
+        Key: outputPath,
+        Body: fs.createReadStream(inputPath),
+        ACL: "public-read"
+      },
+      (err, data) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(data);
+        }
+      }
+    );
   });
 }
 
