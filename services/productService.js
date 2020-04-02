@@ -5,6 +5,7 @@ const fs = require("fs");
 const aws = require("aws-sdk");
 
 const authorization = require("../middlewares/authorization");
+const isAdmin = require("../middlewares/isAdmin");
 const Product = require("../models/product");
 
 aws.config.update({ region: "ap-southeast-1" });
@@ -24,13 +25,17 @@ router.get("/getAllProductsForShelf", (req, res, next) => {
   );
 });
 
-router.get("/getAllProductsForTable", (req, res, next) => {
-  Product.find({}, "name category location price owner createdAt updatedAt")
-    .populate("owner", "email")
-    .exec((err, products) => {
-      res.send(products);
-    });
-});
+router.get(
+  "/getAllProductsForTable",
+  [authorization, isAdmin],
+  (req, res, next) => {
+    Product.find({}, "name category location price owner createdAt updatedAt")
+      .populate("owner", "email")
+      .exec((err, products) => {
+        res.send(products);
+      });
+  }
+);
 
 router.get("/getAllGroupedProducts", (req, res, next) => {
   Product.aggregate([
