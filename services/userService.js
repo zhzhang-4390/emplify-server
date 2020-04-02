@@ -2,12 +2,12 @@ const express = require("express");
 const _ = require("lodash");
 const bcrypt = require("bcrypt");
 
-const authorization = require("../middlewares/authorization");
+const authorizationAny = require("../middlewares/authorizationAny");
 const User = require("../models/user");
 
 const router = express.Router();
 
-router.get("/getAllUsers", authorization, (req, res) => {
+router.get("/getAllUsers", authorizationAny, (req, res) => {
   if (req.session.user.role !== "admin") {
     return res.sendStatus(403);
   }
@@ -38,7 +38,7 @@ router.post("/signIn", async (req, res, next) => {
   }
 });
 
-router.post("/signOut", authorization, (req, res, next) => {
+router.post("/signOut", authorizationAny, (req, res, next) => {
   req.session.destroy(err => {
     if (err) {
       return res.sendStatus(500);
@@ -51,6 +51,11 @@ router.post("/signOut", authorization, (req, res, next) => {
 
 router.post("/signUp", async (req, res, next) => {
   const user = new User(_.pick(req.body, ["email", "password", "role"]));
+  if (user.role === "admin") {
+    if (!req.session.user || req.session.user.role !== "admin") {
+      return res.sendStatus(403);
+    }
+  }
 
   const existingUser = await User.findOne({ email: user.email });
   if (existingUser) {
@@ -64,19 +69,19 @@ router.post("/signUp", async (req, res, next) => {
     .catch(next);
 });
 
-router.get("/getFavourites", authorization, (req, res, next) => {
+router.get("/getFavourites", authorizationAny, (req, res, next) => {
   User.findById(req.session.user._id)
     .populate("favourites", "name description price frontImage")
     .exec((err, user) => res.send(user.favourites));
 });
 
-router.get("/isFavourite", authorization, (req, res, next) => {
+router.get("/isFavourite", authorizationAny, (req, res, next) => {
   User.findById(req.session.user._id).exec((err, user) =>
     res.send(user.favourites.includes(req.query._id))
   );
 });
 
-router.post("/addFavourite", authorization, async (req, res, next) => {
+router.post("/addFavourite", authorizationAny, async (req, res, next) => {
   const user = await User.findById(req.session.user._id);
   user.favourites.push(req.body._id);
   user
@@ -85,7 +90,7 @@ router.post("/addFavourite", authorization, async (req, res, next) => {
     .catch(next);
 });
 
-router.post("/removeFavourite", authorization, async (req, res, next) => {
+router.post("/removeFavourite", authorizationAny, async (req, res, next) => {
   const user = await User.findById(req.session.user._id);
   user.favourites = user.favourites.filter(_id => !_id.equals(req.body._id));
   user
@@ -94,19 +99,19 @@ router.post("/removeFavourite", authorization, async (req, res, next) => {
     .catch(next);
 });
 
-router.get("/getShoppingCart", authorization, (req, res, next) => {
+router.get("/getShoppingCart", authorizationAny, (req, res, next) => {
   User.findById(req.session.user._id)
     .populate("shoppingCart", "name description price frontImage")
     .exec((err, user) => res.send(user.shoppingCart));
 });
 
-router.get("/isInShoppingCart", authorization, (req, res, next) => {
+router.get("/isInShoppingCart", authorizationAny, (req, res, next) => {
   User.findById(req.session.user._id).exec((err, user) =>
     res.send(user.shoppingCart.includes(req.query._id))
   );
 });
 
-router.post("/addToShoppingCart", authorization, async (req, res, next) => {
+router.post("/addToShoppingCart", authorizationAny, async (req, res, next) => {
   const user = await User.findById(req.session.user._id);
   user.shoppingCart.push(req.body._id);
   user
@@ -119,7 +124,7 @@ router.post("/addToShoppingCart", authorization, async (req, res, next) => {
 
 router.post(
   "/removeFromShoppingCart",
-  authorization,
+  authorizationAny,
   async (req, res, next) => {
     const user = await User.findById(req.session.user._id);
     user.shoppingCart = user.shoppingCart.filter(
