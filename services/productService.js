@@ -11,7 +11,7 @@ const Product = require("../models/product");
 aws.config.update({ region: "ap-southeast-1" });
 const s3 = new aws.S3({
   accessKeyId: process.env.AWS_S3_ID,
-  secretAccessKey: process.env.AWS_S3_KEY
+  secretAccessKey: process.env.AWS_S3_KEY,
 });
 const CLOUD_URL = "https://emplify.s3-ap-southeast-1.amazonaws.com/";
 
@@ -47,11 +47,11 @@ router.get("/getAllGroupedProducts", (req, res, next) => {
             name: "$name",
             description: "$description",
             price: "$price",
-            frontImage: "$frontImage"
-          }
-        }
-      }
-    }
+            frontImage: "$frontImage",
+          },
+        },
+      },
+    },
   ]).exec((err, products) => {
     res.send(products);
   });
@@ -91,18 +91,20 @@ router.post("/addOrUpdateProduct", authorization, async (req, res, next) => {
         "details",
         "frontImage",
         "images",
-        "imagesToRemove"
+        "imagesToRemove",
       ]),
       {
-        owner: req.session.user._id
+        owner: req.session.user._id,
       }
     );
 
     product.details = [];
-    JSON.parse(fields.details).forEach(detail => product.details.push(detail));
+    JSON.parse(fields.details).forEach((detail) =>
+      product.details.push(detail)
+    );
 
     if (product.images.length !== 0) {
-      JSON.parse(fields.imagesToRemove).forEach(image =>
+      JSON.parse(fields.imagesToRemove).forEach((image) =>
         product.images.pull(image)
       );
     }
@@ -118,10 +120,10 @@ router.post("/addOrUpdateProduct", authorization, async (req, res, next) => {
     if (files.images) {
       files.images = [].concat(files.images);
       const imageCloudPaths = files.images.map(
-        image => `products/${product.name}/images/${image.name}`
+        (image) => `products/${product.name}/images/${image.name}`
       );
       const imageCloudURLs = imageCloudPaths.map(
-        imageCloudPath => CLOUD_URL + imageCloudPath
+        (imageCloudPath) => CLOUD_URL + imageCloudPath
       );
 
       product.images = product.images.concat(imageCloudURLs);
@@ -151,7 +153,7 @@ function uploadToCloud(inputPath, outputPath) {
         Bucket: "emplify",
         Key: outputPath,
         Body: fs.createReadStream(inputPath),
-        ACL: "public-read"
+        ACL: "public-read",
       },
       (err, data) => {
         if (err) {

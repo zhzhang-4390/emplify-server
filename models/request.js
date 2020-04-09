@@ -7,31 +7,31 @@ const requestSchema = new Schema(
     company: {
       type: String,
       required: true,
-      trim: true
+      trim: true,
     },
     name: {
       type: String,
       required: true,
-      trim: true
+      trim: true,
     },
     email: {
       type: String,
       required: true,
-      trim: true
+      trim: true,
     },
     contactNumber: {
       type: String,
-      trim: true
+      trim: true,
     },
     requirement: {
       type: String,
-      trim: true
+      trim: true,
     },
     role: {
       type: String,
       required: true,
-      trim: true
-    }
+      trim: true,
+    },
   },
   { timestamps: true }
 );

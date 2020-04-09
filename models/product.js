@@ -7,45 +7,45 @@ const productSchema = new Schema(
       type: String,
       required: true,
       unique: true,
-      trim: true
+      trim: true,
     },
     category: {
       type: String,
       required: true,
-      trim: true
+      trim: true,
     },
     description: {
       type: String,
-      trim: true
+      trim: true,
     },
     location: {
-      type: Object
+      type: Object,
     },
     price: {
       type: Number,
-      required: true
+      required: true,
     },
     details: [
       {
         type: String,
-        trim: true
-      }
+        trim: true,
+      },
     ],
     owner: {
       type: Schema.Types.ObjectId,
       required: true,
-      ref: "User"
+      ref: "User",
     },
     frontImage: {
       type: String,
-      trim: true
+      trim: true,
     },
     images: [
       {
         type: String,
-        trim: true
-      }
-    ]
+        trim: true,
+      },
+    ],
   },
   { timestamps: true }
 );

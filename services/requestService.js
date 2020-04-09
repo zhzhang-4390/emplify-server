@@ -21,7 +21,7 @@ router.post("/addRequest", (req, res, next) => {
       "email",
       "contactNumber",
       "requirement",
-      "role"
+      "role",
     ])
   );
 

@@ -8,29 +8,29 @@ const userSchema = new Schema(
       type: String,
       required: true,
       unique: true,
-      trim: true
+      trim: true,
     },
     password: {
       type: String,
-      required: true
+      required: true,
     },
     role: {
       type: String,
       required: true,
-      trim: true
+      trim: true,
     },
     favourites: [
       {
         type: Schema.Types.ObjectId,
-        ref: "Product"
-      }
+        ref: "Product",
+      },
     ],
     shoppingCart: [
       {
         type: Schema.Types.ObjectId,
-        ref: "Product"
-      }
-    ]
+        ref: "Product",
+      },
+    ],
   },
   { timestamps: true }
 );

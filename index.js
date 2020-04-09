@@ -20,8 +20,8 @@ app.use(
     resave: false,
     saveUninitialized: false,
     cookie: {
-      maxAge: 86400000
-    }
+      maxAge: 86400000,
+    },
   })
 );
 app.use("/userService", require("./services/userService"));
@@ -33,7 +33,7 @@ app.listen(port, () => console.log(`Emplify server listening on port ${port}`));
 mongoose.connect(
   process.env.DB_CONNECTION,
   { useNewUrlParser: true, useCreateIndex: true, useUnifiedTopology: true },
-  err => {
+  (err) => {
     if (err) {
       console.error(err.message);
     } else {
