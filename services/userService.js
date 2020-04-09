@@ -32,7 +32,7 @@ router.post("/signIn", async (req, res, next) => {
     res.send({
       email: existingUser.email,
       role: existingUser.role,
-      shoppingCartSize: existingUser.shoppingCart.length
+      shoppingCartSize: existingUser.shoppingCart.length,
     });
   } else {
     res.sendStatus(401);
@@ -40,7 +40,7 @@ router.post("/signIn", async (req, res, next) => {
 });
 
 router.post("/signOut", authorization, (req, res, next) => {
-  req.session.destroy(err => {
+  req.session.destroy((err) => {
     if (err) {
       return res.sendStatus(500);
     }
@@ -70,6 +70,27 @@ router.post("/signUp", async (req, res, next) => {
     .catch(next);
 });
 
+router.post("/changePassword", authorization, async (req, res, next) => {
+  const existingUser = await User.findById(req.session.user._id);
+  if (!existingUser) {
+    return res.sendStatus(404);
+  }
+
+  const matched = await bcrypt.compare(
+    req.body.currentPassword,
+    existingUser.password
+  );
+  if (!matched) {
+    return res.sendStatus(403);
+  }
+
+  existingUser.password = await bcrypt.hash(req.body.newPassword, 10);
+  existingUser
+    .save()
+    .then(() => res.sendStatus(200))
+    .catch(next);
+});
+
 router.get("/getFavourites", authorization, (req, res, next) => {
   User.findById(req.session.user._id)
     .populate("favourites", "name description price frontImage")
@@ -93,7 +114,7 @@ router.post("/addFavourite", authorization, async (req, res, next) => {
 
 router.post("/removeFavourite", authorization, async (req, res, next) => {
   const user = await User.findById(req.session.user._id);
-  user.favourites = user.favourites.filter(_id => !_id.equals(req.body._id));
+  user.favourites = user.favourites.filter((_id) => !_id.equals(req.body._id));
   user
     .save()
     .then(() => res.sendStatus(200))
@@ -129,7 +150,7 @@ router.post(
   async (req, res, next) => {
     const user = await User.findById(req.session.user._id);
     user.shoppingCart = user.shoppingCart.filter(
-      _id => !_id.equals(req.body._id)
+      (_id) => !_id.equals(req.body._id)
     );
     user
       .save()
