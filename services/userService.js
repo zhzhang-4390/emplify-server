@@ -5,6 +5,7 @@ const bcrypt = require("bcrypt");
 const authorization = require("../middlewares/authorization");
 const isAdmin = require("../middlewares/isAdmin");
 const User = require("../models/user");
+const Login = require("../models/login");
 
 const router = express.Router();
 
@@ -29,6 +30,9 @@ router.post("/signIn", async (req, res, next) => {
   const matched = await bcrypt.compare(user.password, existingUser.password);
   if (matched) {
     req.session.user = _.pick(existingUser, ["_id", "role"]);
+
+    new Login({ user: existingUser._id, time: Date.now() }).save();
+
     res.send({
       email: existingUser.email,
       role: existingUser.role,
