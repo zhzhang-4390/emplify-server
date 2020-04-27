@@ -55,7 +55,9 @@ router.post("/signOut", authorization, (req, res, next) => {
 });
 
 router.post("/signUp", async (req, res, next) => {
-  const user = new User(_.pick(req.body, ["email", "password", "role"]));
+  const user = new User(
+    _.pick(req.body, ["email", "name", "password", "role"])
+  );
   if (user.role === "admin") {
     if (!req.session.user || req.session.user.role !== "admin") {
       return res.sendStatus(403);
