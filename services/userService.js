@@ -14,7 +14,7 @@ router.get("/getAllUsers", [authorization, isAdmin], (req, res) => {
     return res.sendStatus(403);
   }
 
-  User.find({}, "email role createdAt updatedAt").exec((err, users) => {
+  User.find({}, "email name role createdAt updatedAt").exec((err, users) => {
     res.send(users);
   });
 });
@@ -34,7 +34,7 @@ router.post("/signIn", async (req, res, next) => {
     new Login({ user: existingUser._id, time: Date.now() }).save();
 
     res.send({
-      email: existingUser.email,
+      name: existingUser.name,
       role: existingUser.role,
       shoppingCartSize: existingUser.shoppingCart.length,
     });
