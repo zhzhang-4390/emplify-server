@@ -10,6 +10,7 @@ if (process.env.NODE_ENV !== "production") {
 const app = express();
 const port = process.env.PORT;
 
+// Middlewares
 app.use(express.json());
 app.use(cors());
 app.use(
@@ -24,12 +25,21 @@ app.use(
     },
   })
 );
+
+// APIs
 app.use("/userService", require("./services/userService"));
 app.use("/productService", require("./services/productService"));
 app.use("/requestService", require("./services/requestService"));
+const listener = require("./services/chatService");
 
-app.listen(port, () => console.log(`Emplify server listening on port ${port}`));
+// Socket.io
+const server = app.listen(port, () =>
+  console.log(`Emplify server listening on port ${port}`)
+);
+const io = require("socket.io")(server);
+io.on("connection", listener);
 
+// Database
 mongoose.connect(
   process.env.DB_CONNECTION,
   { useNewUrlParser: true, useCreateIndex: true, useUnifiedTopology: true },

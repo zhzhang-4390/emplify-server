@@ -34,6 +34,7 @@ router.post("/signIn", async (req, res, next) => {
     new Login({ user: existingUser._id, time: Date.now() }).save();
 
     res.send({
+      _id: existingUser._id,
       name: existingUser.name,
       role: existingUser.role,
       shoppingCartSize: existingUser.shoppingCart.length,
