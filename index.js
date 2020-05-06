@@ -36,7 +36,7 @@ const listener = require("./services/chatService");
 const server = app.listen(port, () =>
   console.log(`Emplify server listening on port ${port}`)
 );
-const io = require("socket.io")(server);
+const io = require("socket.io")(server, { path: "/chatService" });
 io.on("connection", listener);
 
 // Database
