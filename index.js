@@ -30,19 +30,16 @@ app.use(
 app.use("/userService", require("./services/userService"));
 app.use("/productService", require("./services/productService"));
 app.use("/requestService", require("./services/requestService"));
-const listener = require("./services/chatService");
-
-// Socket.io
-const server = app.listen(port, () =>
-  console.log(`Emplify server listening on port ${port}`)
-);
-const io = require("socket.io")(server, { path: "/chatService" });
-io.on("connection", listener);
 
 // Database
 mongoose.connect(
   process.env.DB_CONNECTION,
-  { useNewUrlParser: true, useCreateIndex: true, useUnifiedTopology: true },
+  {
+    useNewUrlParser: true,
+    useCreateIndex: true,
+    useUnifiedTopology: true,
+    useFindAndModify: false,
+  },
   (err) => {
     if (err) {
       console.error(err.message);
@@ -51,3 +48,5 @@ mongoose.connect(
     }
   }
 );
+
+app.listen(port, () => console.log(`Emplify server listening on port ${port}`));
